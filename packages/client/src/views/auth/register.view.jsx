@@ -1,18 +1,73 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
+import axios from '../../api/api';
+import { toast } from "react-toastify";
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
+    const navigate = useNavigate();
+
     const {
         handleSubmit,
         register,
         watch,
+        reset,
         formState: { errors }
     } = useForm({ mode: 'all' });
 
     const password = watch('password');
 
-    const onSubmit = (data) => {
-        console.log(data);
+    const onSubmit = async (data) => {
+        const response = await axios.post("/auth/register", JSON.stringify(data), {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            withCredentials: true
+        })
+            .catch(error => {
+                toast.error(error.response.data.message, {
+                    position: "top-right",
+                    autoClose: 2500,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light"
+                });
+            });
+
+        const { success, message } = response.data;
+
+        if (success) {
+            toast.success(message, {
+                position: "top-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+
+            reset({username: "", email: "", password: "", cpassword: ""});
+
+            setTimeout(() => {
+                navigate('/auth/login');
+            }, 2600)
+        } else {
+            toast.error(message, {
+                position: "top-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+        }
     }
 
     return (
@@ -29,10 +84,10 @@ const Register = () => {
                             placeholder="Choose unique username"
                             className="input input-bordered input-primary w-full"
                             {...register('username',
-                                { 
+                                {
                                     required: { value: true, message: 'Username is required!' },
-                                    minLength: {value: 6, message: 'Username must contain atleast 6 characters!'},
-                                    maxLength: {value: 12, message: 'Username must contain atmost 12 characters!'}
+                                    minLength: { value: 6, message: 'Username must contain atleast 6 characters!' },
+                                    maxLength: { value: 12, message: 'Username must contain atmost 12 characters!' }
                                 }
                             )} />
                         {errors?.username && <p className='text-error'>{errors?.username?.message}</p>}
@@ -60,9 +115,9 @@ const Register = () => {
                             placeholder="Choose a strong password"
                             className="input input-bordered input-primary w-full"
                             {...register('password',
-                                { 
+                                {
                                     required: { value: true, message: 'Password is required!' },
-                                    minLength: {value: 8, message: 'Password must contain atleast 8 characters!'}
+                                    minLength: { value: 8, message: 'Password must contain atleast 8 characters!' }
                                 }
                             )} />
                         {errors?.password && <p className='text-error'>{errors?.password?.message}</p>}
@@ -75,7 +130,7 @@ const Register = () => {
                             placeholder="Confirm your password"
                             className="input input-bordered input-primary w-full"
                             {...register('cpassword',
-                                { 
+                                {
                                     required: { value: true, message: 'Confirm Password is required!' },
                                     validate: (value) => password === value || 'Passwords do not match!'
                                 }

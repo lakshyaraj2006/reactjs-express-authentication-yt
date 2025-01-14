@@ -9,7 +9,7 @@ export const createApp = () => {
     app.use(express.json());
     app.use(cookieParser());
     app.use(cors({
-        origin: '*',
+        origin: process.env.CORS_ORIGIN,
         credentials: true
     }));
 
