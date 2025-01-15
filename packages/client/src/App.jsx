@@ -4,6 +4,7 @@ import RootLayout from "./components/layouts/root.layout";
 import AuthLayout from "./components/layouts/auth.layout";
 import Login from "./views/auth/login.view";
 import Register from "./views/auth/register.view";
+import { ProtectedRoutes } from "./components/UI/protected-routes.component";
 
 const router = createBrowserRouter([
   {
@@ -11,8 +12,13 @@ const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       {
-        path: "/",
-        element: <Home />
+        element: <ProtectedRoutes />,
+        children: [
+          {
+            path: "/",
+            element: <Home />
+          }
+        ]
       }
     ]
   },

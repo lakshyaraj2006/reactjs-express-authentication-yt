@@ -1,15 +1,73 @@
 import React from 'react';
 import { useForm } from "react-hook-form"
+import axios from '../../api/api';
+import { toast } from "react-toastify";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../../hooks/useAuth";
 
 const Login = () => {
+    const navigate = useNavigate();
+    const { setAuth } = useAuth();
+
     const {
         handleSubmit,
         register,
+        reset,
         formState: { errors }
     } = useForm({ mode: 'all' });
 
-    const onSubmit = (data) => {
-        console.log(data);
+    const onSubmit = async (data) => {
+        const response = await axios.post("/auth/login", JSON.stringify(data), {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            withCredentials: true
+        })
+            .catch(error => {
+                toast.error(error.response.data.message, {
+                    position: "top-right",
+                    autoClose: 2500,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light"
+                });
+            });
+        const { success, message } = response.data;
+
+        if (success) {
+            toast.success(message, {
+                position: "top-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+
+            
+            reset({ username: "", password: "" });
+            setAuth({ accessToken: response.data.accessToken });
+
+            setTimeout(() => {
+                navigate('/');
+            }, 2600)
+        } else {
+            toast.error(message, {
+                position: "top-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+        }
     }
 
     return (
